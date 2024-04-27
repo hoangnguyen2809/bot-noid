@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events, Collection } = require('discord.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -28,8 +28,7 @@ module.exports = {
 			const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
 
 			if (now < expirationTime) {
-				const expiredTimestamp = Math.round(expirationTime / 1000);
-				return interaction.reply({ content: `Please wait, you are on a cooldown for \`${command.data.name}\`. You can use it again <t:${expiredTimestamp}:R>.`, ephemeral: true });
+				return interaction.reply({ content: `Too fast! Please wait 3 seconds before using \`${command.data.name}\` again.`, ephemeral: true });
 			}
 		}
 
