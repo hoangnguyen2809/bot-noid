@@ -6,6 +6,11 @@ module.exports = {
 		.setName('ping')
 		.setDescription('Replies with Pong!'),
 	async execute(interaction) {
-		await interaction.reply('Pong!');
+		if (interaction.commandName === 'ping') {
+			await interaction.reply('Pong!');
+		}
 	},
 };
+
+
+//note: use defferred responses for chatgpt
