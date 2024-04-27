@@ -16,7 +16,6 @@ for (const folder of commandFolders) {
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
-		// Set a new item in the Collection with the key as the command name and the value as the exported module
 		if ('data' in command && 'execute' in command) {
 			client.commands.set(command.data.name, command);
 		} else {
@@ -25,6 +24,12 @@ for (const folder of commandFolders) {
 	}
 }
 
+// console.log("Contents of client.commands:");
+// client.commands.forEach((command, name) => {
+//     console.log(`${name}:`, command);
+// });
+
+client.cooldowns = new Collection();
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
