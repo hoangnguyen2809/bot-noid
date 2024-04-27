@@ -1,15 +1,19 @@
 const { SlashCommandBuilder } = require('discord.js');
+const {dev } = require('../../config.json');
 
 module.exports = {
 	category: 'utility',
 	data: new SlashCommandBuilder()
 		.setName('reload')
-		.setDescription('Reloads a command.')
+		.setDescription('Reloads a command. Only accessible as devs')
 		.addStringOption(option =>
 			option.setName('command')
 				.setDescription('The command to reload.')
 				.setRequired(true)),
 	async execute(client, interaction) {
+		if (!dev.includes(interaction.user.id)) {
+			return interaction.reply('You do not have permission to use this command!');
+		}
 		const commandName = interaction.options.getString('command', true).toLowerCase();
 		const command = interaction.client.commands.get(commandName);
 
