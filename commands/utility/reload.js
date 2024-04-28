@@ -12,7 +12,7 @@ module.exports = {
 				.setRequired(true)),
 	async execute(client, interaction) {
 		if (!dev.includes(interaction.user.id)) {
-			return interaction.reply('You do not have permission to use this command!');
+			return interaction.reply({content: 'You do not have permission to use this command!', ephemeral: true});
 		}
 		const commandName = interaction.options.getString('command', true).toLowerCase();
 		const command = interaction.client.commands.get(commandName);
@@ -27,7 +27,7 @@ module.exports = {
 			interaction.client.commands.delete(command.data.name);
 			const newCommand = require(`./${command.data.name}.js`);
 			interaction.client.commands.set(newCommand.data.name, newCommand);
-			await interaction.reply(`Command \`${newCommand.data.name}\` was reloaded!`, { ephemeral: true });
+			await interaction.reply({content: `Command \`${newCommand.data.name}\` was reloaded!`, ephemeral: true });
 		} catch (error) {
 			console.error(error);
 			await interaction.reply(`There was an error while reloading a command \`${command.data.name}\`:\n\`${error.message}\``);
