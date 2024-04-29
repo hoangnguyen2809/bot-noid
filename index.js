@@ -5,11 +5,9 @@ const { Client, Collection, Events, GatewayIntentBits, IntentsBitField  } = requ
 const { Player } = require('discord-player');
 const { token } = require('./config.json');
 const { YouTubeExtractor } = require('@discord-player/extractor');
-//const { generateDependencyReport } = require('@discordjs/voice');
-const { VoiceConnectionStatus, AudioPlayerStatus } = require('@discordjs/voice');
+const { generateDependencyReport } = require('@discordjs/voice');
 
-
-//console.log(generateDependencyReport());
+console.log(generateDependencyReport());
 
 // Create a new client instance
 const client = new Client({
@@ -24,14 +22,13 @@ const client = new Client({
 
 client.commands = new Collection();
 client.player = new Player(client);
-client.player.extractors.register(YouTubeExtractor);
+client.player.extractors.loadDefault();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
 	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-	console.log(commandFiles)
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
@@ -42,11 +39,6 @@ for (const folder of commandFolders) {
 		}
 	}
 }
-
-// console.log("Contents of client.commands:");
-// client.commands.forEach((command, name) => {
-//     console.log(`${name}:`, command);
-// });
 
 client.cooldowns = new Collection();
 const eventsPath = path.join(__dirname, 'events');
