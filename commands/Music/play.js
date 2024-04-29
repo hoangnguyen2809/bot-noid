@@ -1,8 +1,7 @@
 const { SlashCommandBuilder } = require("@discordjs/builders")
-const { MessageEmbed } = require("discord.js")
-const { QueryType } = require("discord-player")
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, } = require('@discordjs/voice');
-const { createDiscordJSAdapter } = require('@discordjs/voice');
+const { QueryType, useMainPlayer, useQueue } = require('discord-player');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus} = require('@discordjs/voice');
+const { EmbedBuilder, Permissions, PermissionsBitField   } = require('discord.js');
 
 module.exports = {
     category: 'Music',
@@ -18,34 +17,49 @@ module.exports = {
         if (!voiceChannel) {
             return interaction.reply("You need to be in a voice channel to use this command.");
         }
-        
-        const query = interaction.options.getString("input");
 
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Connect) || !interaction.member.permissions.has(PermissionsBitField.Flags.SPEAK)) {
+            return interaction.reply("I don't have permission to speak in that voice channel.");
+        }
+
+        const query = interaction.options.getString("input");
         const searchResult = await client.player.search(query, {
             requestedBy: interaction.user,
             searchEngine: QueryType.AUTO
         });
 
+        const NoResultsEmbed = new EmbedBuilder()
+            .setAuthor({ name: `No results found... try again ?`})
 
         if (!searchResult || !searchResult.tracks.length) {
-            return interaction.reply("No search results found.");
+            return interaction.editReply({ embeds: [NoResultsEmbed] });
         }
-
-        console.log(searchResult.tracks.length);
-
-
-        console.log(searchResult.tracks[0]);
-        const queue = client.player.nodes.create(interaction.guild, {
-            metadata: {
-                channel: interaction.channel,
-            },
-        });
-        joinVoiceChannel({
+        const connection = joinVoiceChannel({
             channelId: interaction.member.voice.channel.id,
-            guildId: interaction.guild.id,
-            adapterCreator: interaction.guild.voiceAdapterCreator
-        })
+            guildId: interaction.member.guild.id,
+            adapterCreator: interaction.guild.voiceAdapterCreator,
+        });
+
+        connection.on('stateChange', (oldState, newState) => {
+            console.log(`Voice state changed: ${oldState.status} -> ${newState.status}`);
+        });
         
+        const player = createAudioPlayer();
+        const resource = createAudioResource(searchResult.tracks[0].url);
+        //console.log(resource);
+        
+        player.play(resource);
+        connection.subscribe(player);
+
+        player.on(AudioPlayerStatus.Playing, () => {
+            console.log('The audio player has started playing!');
+        });
+        player.on('error', error => {
+            console.error(`Error: ${error.message} with resource ${error.resource.metadata.title}`);
+            player.play(getNextResource());
+        });
+
+        await interaction.reply(`Now playing: ${searchResult.tracks[0].title}`);
     },
 
 };
