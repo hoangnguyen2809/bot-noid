@@ -24,11 +24,9 @@ module.exports = {
                 for(const file of commandFiles) {
                     const filePath = path.join(commandsPath, file);
                     const command = require(filePath);
-                    embed.addFields({ name: "/" + command.data.name, value: command.data.description});
+                    embed.addFields({ name: "/" + command.data.name, value: command.data.description, inline: true});
                 }
             }
-
-
         await interaction.reply({ embeds: [embed] });
 	},  
 };
